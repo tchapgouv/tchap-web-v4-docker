@@ -14,6 +14,7 @@ env:
   APP_PATH: tchap-web-v4
   APP_RELEASE: develop_tchap
   # APP_RELEASE: tchap-4.1.3_1.11.12
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner}}/tchap-web-v4
 
 jobs:
   build:
@@ -57,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY_BASE_PATH }}
+          images: ${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
@@ -71,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ${{ env.APP_PATH }}
-          tags: "${{ env.REGISTRY_BASE_PATH }}:${{ steps.set-tag.outputs.tag }}, ${{ env.REGISTRY_BASE_PATH }}:latest"
+          tags: "${{ env.IMAGE_NAME }}:${{ steps.set-tag.outputs.tag }}, ${{ env.IMAGE_NAME }}:latest"
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           push: true
