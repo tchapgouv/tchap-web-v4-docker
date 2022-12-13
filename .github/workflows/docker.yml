@@ -1,0 +1,75 @@
+name: Docker
+
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+  # every day
+    - cron: '0 1 * * *'
+
+env:
+  REGISTRY: ghcr.io
+  REGISTRY_BASE_PATH: ghcr.io/${{ github.repository }}
+  APP_REPOSITORY: tchapgouv/tchap-web-v4
+  APP_PATH: tchap-web-v4
+  APP_RELEASE: develop_tchap
+  # APP_RELEASE: tchap-4.1.3_1.11.12
+
+jobs:
+  build:
+    name: Build and publish images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout docker code
+        uses: actions/checkout@v3
+
+      - name: Checkout tchap-web-v4 code
+        uses: actions/checkout@v3
+        with:
+          repository: '${{ env.APP_REPOSITORY }}'
+          path: '${{ env.APP_PATH }}'
+          ## change default tag
+          ref: '${{ env.APP_RELEASE }}'
+
+      - name: Calculate docker image tag
+        id: set-tag
+        run: |
+          ( cd ${APP_PATH}
+          git fetch -t
+          tag=$( git describe --tags --always)
+          echo "$tag"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          )
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY_BASE_PATH }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+      
+      - name: Use custom Dockerfile
+        run: |
+          cp docker/Dockerfile ${APP_PATH}/
+          cp docker/dot-dockerignore ${APP_PATH}/.dockerignore
+ 
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ env.APP_PATH }}
+          tags: "${{ env.REGISTRY_BASE_PATH }}:${{ steps.set-tag.outputs.tag }}, ${{ env.REGISTRY_BASE_PATH }}:latest"
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          push: true
