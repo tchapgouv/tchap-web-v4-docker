@@ -33,6 +33,8 @@ jobs:
           path: '${{ env.APP_PATH }}'
           ## change default tag
           ref: '${{ env.APP_RELEASE }}'
+          # to fetch all tag
+          fetch-depth: 0
 
       - name: Calculate docker image tag
         id: set-tag
