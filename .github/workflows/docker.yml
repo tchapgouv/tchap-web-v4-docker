@@ -55,7 +55,7 @@ jobs:
 
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY_BASE_PATH }}
           tags: |
@@ -68,7 +68,7 @@ jobs:
           cp docker/dot-dockerignore ${APP_PATH}/.dockerignore
  
       - name: Build and push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ${{ env.APP_PATH }}
           tags: "${{ env.REGISTRY_BASE_PATH }}:${{ steps.set-tag.outputs.tag }}, ${{ env.REGISTRY_BASE_PATH }}:latest"
