@@ -16,7 +16,7 @@ RUN cp /src/config.sample.json /src/webapp/config.json
 # App
 FROM nginx:alpine
 
-COPY --from=builder /src/webapp /app
+COPY --from=builder /src/dist /app
 
 # Override default nginx config
 COPY /nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
