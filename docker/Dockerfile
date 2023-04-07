@@ -8,7 +8,7 @@ WORKDIR /src
 COPY . /src
 RUN yarn --network-timeout=100000 install
 
-RUN dos2unix /src/scripts/package-github.sh && bash /src/scripts/package-github.sh
+RUN dos2unix /src/scripts/tchap/package-github.sh && bash /src/scripts/tchap/package-github.sh
 
 # Copy the config now so that we don't create another layer in the app image
 RUN cp /src/config.sample.json /src/webapp/config.json
